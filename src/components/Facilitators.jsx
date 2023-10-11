@@ -36,6 +36,7 @@ export default function Facilitators(){
 
         const data = await response.json();
         setFacilitators(data);
+        console.log('facilitators', facilitators);
       } catch (error) {
         console.error("Error fetching facilitators: ", error);
       }
@@ -66,6 +67,7 @@ export default function Facilitators(){
       console.error("Error sending the request:", error);
     }
   };
+  console.log('facilitators', facilitators);
     return(
 
         <table className="table-auto w-4/5 mx-auto">
@@ -84,7 +86,7 @@ export default function Facilitators(){
               <td className="py-2 px-4">{facilitator.firstName}</td>
               <td className="py-2 px-4">{facilitator.lastName}</td>
               <td className="py-2 px-4">{facilitator.email}</td>
-              <td><button  onClick={()=>handleVerify(facilitator)}>Verify</button></td>
+              <td><button className={`pl-4 hover:underline ${facilitator.isVerified?'text-[#35C082]':'text-blue-500'}`} onClick={()=>handleVerify(facilitator)}>{!facilitator.isVerified?'Verify':'Verified'}</button></td>
             </tr>
           )) : null}
         </tbody>

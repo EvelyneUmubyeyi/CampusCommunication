@@ -109,7 +109,7 @@ export default function Facilitator() {
           <div className="bg-white shadow-2xl py-5 w-[20rem] h-[20rem] rounded mt-10 text-white relative flex flex-col items-center">
             <div className="modal w-4/5">
               <textarea
-                className="w-full h-32 p-2 border rounded"
+                className="w-full h-32 p-2 border roundedv text-black"
                 placeholder="Enter your reply"
                 value={textAreaValue}
                 onChange={(e) => setTextAreaValue(e.target.value)}
@@ -128,25 +128,8 @@ export default function Facilitator() {
                   Close
                 </button>
               </div>
-              {/* <button
-                className="bg-[#35C082] shadow-xl py-2 text-white font-semibold rounded w-[1/3]"
-                onClick={handleReply}
-              >
-                Submit
-              </button>
-              <button
-                className="bg-[#35C082] shadow-xl py-2 text-white font-semibold rounded w-[1/3]"
-                onClick={closeModal}
-              >
-                Close
-              </button> */}
+              
             </div>
-            {/* <button
-              onClick={closeModal}
-              className="bg-[#35C082] shadow-xl py-2 text-white font-semibold rounded absolute bottom-5 w-4/5"
-            >
-              Close
-            </button> */}
           </div>
         </div>
       )}
