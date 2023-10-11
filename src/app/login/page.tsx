@@ -9,6 +9,7 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import axios from "../../../axios";
+import jwt from "jsonwebtoken";
 
 type Login = {
   email: string;
@@ -68,10 +69,17 @@ export default function LoginForm() {
           toast.success("Logged in successfully");
           console.log('token', response.data.data.token);
           localStorage.setItem('token', response.data.data.token);
-          router.push("/");
+          const decodedToken = jwt.decode(response.data.data.token);
+          if(decodedToken && typeof decodedToken !== 'string' && decodedToken.role === "student"){
+            router.push("/student");
+          } else if (decodedToken && typeof decodedToken !== 'string' && decodedToken.role === "facilitator"){
+            router.push("/facilitator")
+          } else{
+            router.push('/admin')
+          }
         }
       })
-      .catch((error) => {
+      .catch((error: any) => {
         if (error.response.status === 400) {
           toast.error(error.response.data.message);
         }else{
