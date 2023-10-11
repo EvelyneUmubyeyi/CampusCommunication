@@ -7,49 +7,87 @@ import { MailOutline, Password } from "@mui/icons-material";
 import LockIcon from "@mui/icons-material/Lock";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useRouter } from "next/navigation";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
+import axios from "../../../axios";
+import jwt from "jsonwebtoken";
 type Login = {
   email: string;
   password: string;
-}
+};
 
 export default function LoginForm() {
   const router = useRouter();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formData, setFormData] = useState<Login>({
-    email:'',
-    password:''
-  })
+    email: "",
+    password: "",
+  });
   const handlePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     let { name, value } = event.target;
 
-    setFormData((prevState:any) => ({
+    setFormData((prevState: any) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent) =>{
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const { email, password } = formData;
     if (!email) {
-        toast.error('Please provide email!');
-        return;
+      toast.error("Please provide email!");
+      return;
     }
 
     if (!password) {
-        toast.error('Please provide password!');
-        return;
+      toast.error("Please provide password!");
+      return;
     }
-  }
+
+    const emailRegex =
+      /^[A-Z0-9._%+-]+@(?:alueducation|alustudent)\.[A-Z]{2,}$/i;
+
+    if (!emailRegex.test(email)) {
+      toast.error("Please provide a valid ALU email!");
+      return;
+    }
+
+    axios
+      .post("/users/login", formData)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('res', response);
+          toast.success("Logged in successfully");
+          console.log('token', response.data.data.token);
+          localStorage.setItem('token', response.data.data.token);
+
+          const decodedToken = jwt.decode(response.data.data.token);
+          if(decodedToken && typeof decodedToken !== 'string' && decodedToken.role === "student"){
+            router.push("/student");
+          } else if (decodedToken && typeof decodedToken !== 'string' && decodedToken.role === "faculty"){
+            router.push("/faculty")
+          } else{
+            router.push('/admin')
+          }
+        }
+      })
+      .catch((error: any) => {
+        if (error.response.status === 400) {
+          toast.error(error.response.data.message);
+        }else{
+          console.error("Error:", error);
+          toast.error("Login failed");
+          }
+      });
+  };
 
   return (
     <div className="mx-10 md:flex md:items-start md:justify-center md:pl-0 md:w-screen md:mr-0 md:pr-0 lg:table lg:my-16 xl:my-20 lg:w-[85vw] xl:w-[80vw] lg:m-auto">
@@ -86,7 +124,7 @@ export default function LoginForm() {
                 type="email"
                 name="email"
                 placeholder="Your Email"
-                value= {formData.email}
+                value={formData.email}
                 onChange={handleChange}
               />
             </div>
@@ -130,7 +168,7 @@ export default function LoginForm() {
           </button>
         </form>
         <p className="font-medium text-[#747980] m-auto w-full md:mx-0 text-center mt-12 mb-16 md:mb-8">
-          Don&apos;t have an account ?{" "}
+          Don&apos;t have an account?{" "}
           <span
             className="text-[#35C082] cursor-pointer"
             onClick={() => {

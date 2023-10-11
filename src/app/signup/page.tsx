@@ -7,13 +7,13 @@ import LockIcon from "@mui/icons-material/Lock";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import axios from "../../../axios";
 
 type User = {
-  fName: string;
-  lName: string;
-  phone: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -34,9 +34,8 @@ export default function LoginForm() {
   });
 
   const [formData, setFormData] = useState<User>({
-    fName: "",
-    lName: "",
-    phone: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -55,10 +54,6 @@ export default function LoginForm() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     let { name, value } = event.target;
-
-    if (name === "phone") {
-      value = value.replace(/[^0-9+]/g, "");
-    }
 
     setFormData((prevState) => ({
       ...prevState,
@@ -92,23 +87,61 @@ export default function LoginForm() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const { fName, lName, phone, email, password, confirmPassword } = formData;
-    if (!fName || !lName || !phone || !email || !password || !confirmPassword) {
-      toast.error('Please fill all fields!');
+    const { firstName, lastName, email, password, confirmPassword } = formData;
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      toast.error("Please fill all fields!");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwords are not matching!');
+      toast.error("Passwords are not matching!");
       return;
     }
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const emailRegex =
+      /^[A-Z0-9._%+-]+@(?:alueducation|alustudent)\.[A-Z]{2,}$/i;
 
     if (!emailRegex.test(email)) {
-      toast.error('Please provide valid email!');
+      toast.error("Please provide a valid ALU email!");
       return;
     }
-  }
+
+    const user = {
+      firstName,
+      lastName,
+      email,
+      password
+    };
+
+    if (email.includes("@alustudent")) {
+      axios
+        .post("/users/register-student", user)
+        .then((response) => {
+          if(response.status === 201){
+            toast.success("Student registered successfully");
+            router.push('/login');
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          toast.error("Could not register the student");
+        });
+    }
+
+    if (email.includes("@alueducation")) {
+      axios
+        .post("/users/register-faculty", user)
+        .then((response) => {
+          if(response.status === 201){
+            toast.success("Faculty registered successfully");
+            router.push('/login');
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          toast.error("Could not register the student");
+        });
+    }
+  };
 
   return (
     <div className="mx-10 md:flex md:items-start md:justify-center md:pl-0 md:w-screen md:mr-0 md:pr-0 lg:table lg:my-16 xl:my-20 lg:w-[85vw] xl:w-[80vw] lg:m-auto">
@@ -139,9 +172,9 @@ export default function LoginForm() {
             <input
               className="bg-[#EEF8F7] py-3 px-4 focus:outline-none font-medium text-sm mt-1 rounded-md"
               type="text"
-              name="fName"
+              name="firstName"
               placeholder="Your First Name"
-              value={formData.fName}
+              value={formData.firstName}
               onChange={handleChange}
             />
           </label>
@@ -153,23 +186,9 @@ export default function LoginForm() {
             <input
               className="bg-[#EEF8F7] py-3 px-4 focus:outline-none font-medium text-sm mt-1 rounded-md"
               type="text"
-              name="lName"
+              name="lastName"
               placeholder="Your Last Name"
-              value={formData.lName}
-              onChange={handleChange}
-            />
-          </label>
-          <label className="text-black flex flex-col mt-5">
-            <span>
-              Phone Number
-              <span className="ml-1 text-red-400">*</span>
-            </span>
-            <input
-              className="bg-[#EEF8F7] py-3 px-4 focus:outline-none font-medium text-sm mt-1 rounded-md"
-              type="text"
-              name="phone"
-              placeholder="Your Phone Number"
-              value={formData.phone}
+              value={formData.lastName}
               onChange={handleChange}
             />
           </label>
@@ -315,11 +334,11 @@ export default function LoginForm() {
           </button>
         </form>
         <p className="font-medium text-[#747980] m-auto w-full md:mx-0 text-center mt-12 mb-16 md:mb-8">
-          Already signed up ?{" "}
+          Already signed up?{" "}
           <span
             className="text-[#35C082] cursor-pointer"
             onClick={() => {
-              router.push('/login');
+              router.push("/login");
             }}
           >
             Login
